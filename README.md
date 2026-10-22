@@ -16,6 +16,12 @@ Tempo is a native SwiftUI iPhone app for building repeatable workout intervals. 
 
 The timer recalculates from a deadline, so it catches up when the app returns to the foreground. Presets and appearance choices are stored on the device.
 
+## Screenshots
+
+| Setup | Countdown |
+| --- | --- |
+| <img src="screenshots/main-page.png" width="280" alt="Tempo workout setup screen" /> | <img src="screenshots/countdown.png" width="280" alt="Tempo active workout countdown screen" /> |
+
 ## Requirements
 
 - macOS with Xcode 26 or later
