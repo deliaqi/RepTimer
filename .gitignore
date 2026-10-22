@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+
+# Xcode build products and per-user state
+DerivedData/
+build/
+xcuserdata/
+*.xcuserstate
+*.xcuserdatad/
+*.xccheckout
+*.moved-aside
+*.hmap
+
+# Generated app and signing artifacts
+*.app
+*.ipa
+*.dSYM
+*.dSYM.zip
+*.mobileprovision
+*.provisionprofile
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.app
