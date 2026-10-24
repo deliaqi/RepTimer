@@ -356,8 +356,8 @@ struct ContentView: View {
             .background {
                 if isNavigationBlurred {
                     Rectangle()
-                        .fill(.regularMaterial)
-                        .overlay(TempoPalette.canvas.opacity(0.98))
+                        .fill(.thinMaterial)
+                        .overlay(TempoPalette.canvas.opacity(0.2))
                         .ignoresSafeArea(edges: .top)
                 } else {
                     Color.clear
@@ -365,7 +365,7 @@ struct ContentView: View {
             }
             .overlay(alignment: .bottom) {
                 if isNavigationBlurred {
-                    TempoPalette.line.opacity(0.7).frame(height: 0.5)
+                    TempoPalette.line.opacity(0.2).frame(height: 0.5)
                 }
             }
             .animation(.easeInOut(duration: 0.18), value: isNavigationBlurred)
@@ -592,9 +592,10 @@ struct ContentView: View {
                 .foregroundStyle(TempoPalette.accentInk)
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
-                .background(TempoPalette.lime, in: RoundedRectangle(cornerRadius: 17, style: .continuous))
             }
-            .buttonStyle(.plain)
+            .background(TempoPalette.lime)
+            .clipShape(Capsule())
+            .buttonStyle(.glass)
         }
         .padding(.horizontal, 22)
         .padding(.top, 12)
