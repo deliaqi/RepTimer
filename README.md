@@ -73,7 +73,9 @@ If `origin` is already configured, update it with `git remote set-url origin YOU
 
 Uploading source code does not install the app on your friend's iPhone. For direct installation, they can build and sign it from Xcode using their own Apple account as described above. For installation without Xcode, distribute a signed build through TestFlight.
 
-This repository does not include a license file. If you want to grant broader reuse rights, choose and add a license before publishing it publicly.
+## License
+
+This app is released under the [MIT License](LICENSE).
 
 ## App icon
 
