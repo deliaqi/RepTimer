@@ -1,5 +1,7 @@
-import Foundation
+import ActivityKit
+import AVFoundation
 import Combine
+import Foundation
 
 enum WorkoutPhase: String {
     case preparation = "PREP"
@@ -13,6 +15,190 @@ enum WorkoutPhase: String {
         case .work: "Work"
         case .rest: "Rest"
         case .cooldown: "Cooldown"
+        }
+    }
+}
+
+struct RepTimerActivityAttributes: ActivityAttributes {
+    public struct ContentState: Codable, Hashable {
+        var phaseRawValue: String
+        var phaseTitle: String
+        var currentRound: Int
+        var totalRounds: Int
+        var remainingSeconds: Int
+        var phaseDuration: Int
+        var endDate: Date?
+        var isRunning: Bool
+        var isComplete: Bool
+        var nextPhaseTitle: String?
+        var nextPhaseSeconds: Int?
+    }
+
+    var totalRounds: Int
+}
+
+@MainActor
+final class WorkoutLiveActivityManager {
+    private var currentActivity: Activity<RepTimerActivityAttributes>?
+
+    func start(rounds: Int, state: RepTimerActivityAttributes.ContentState) {
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        let oldActivities = Activity<RepTimerActivityAttributes>.activities
+        currentActivity = nil
+        for activity in oldActivities {
+            Task {
+                await activity.end(nil, dismissalPolicy: .immediate)
+            }
+        }
+
+        let attributes = RepTimerActivityAttributes(totalRounds: rounds)
+        let content = ActivityContent(state: state, staleDate: state.endDate)
+        currentActivity = try? Activity.request(
+            attributes: attributes,
+            content: content,
+            pushType: nil
+        )
+    }
+
+    func update(state: RepTimerActivityAttributes.ContentState) {
+        guard let activity = currentActivity ?? Activity<RepTimerActivityAttributes>.activities.first else {
+            return
+        }
+        currentActivity = activity
+        let content = ActivityContent(state: state, staleDate: state.endDate)
+        Task {
+            await activity.update(content)
+        }
+    }
+
+    func end() {
+        let activitiesToEnd = Activity<RepTimerActivityAttributes>.activities
+        let tracked = currentActivity
+        currentActivity = nil
+        Task {
+            if let tracked {
+                await tracked.end(nil, dismissalPolicy: .immediate)
+            }
+            for activity in activitiesToEnd where activity.id != tracked?.id {
+                await activity.end(nil, dismissalPolicy: .immediate)
+            }
+        }
+    }
+}
+
+final class CountdownSoundPlayer: @unchecked Sendable {
+    static let settingsKey = "tempo.countdownSound"
+
+    private let audioQueue = DispatchQueue(label: "com.codex.Tempo.countdownAudio", qos: .userInteractive)
+    private var countdownPlayer: AVAudioPlayer?
+    private var transitionPlayer: AVAudioPlayer?
+
+    private var isEnabled: Bool {
+        UserDefaults.standard.object(forKey: Self.settingsKey) as? Bool ?? true
+    }
+
+    init() {
+        audioQueue.async { [weak self] in
+            guard let self else { return }
+            try? AVAudioSession.sharedInstance().setCategory(.ambient, options: [.mixWithOthers])
+            try? AVAudioSession.sharedInstance().setActive(true)
+            self.countdownPlayer = Self.makePlayer(frequency: 880, duration: 0.11, amplitude: 0.35, releaseDuration: 0.03)
+            self.transitionPlayer = Self.makePlayer(frequency: 1318.5, duration: 0.26, amplitude: 0.42, releaseDuration: 0.06)
+        }
+    }
+
+    func playCountdownBeep() {
+        guard isEnabled else { return }
+        audioQueue.async { [weak self] in
+            guard let self else { return }
+            self.play(self.countdownPlayer)
+        }
+    }
+
+    func playTransitionTone() {
+        guard isEnabled else { return }
+        audioQueue.async { [weak self] in
+            guard let self else { return }
+            self.play(self.transitionPlayer)
+        }
+    }
+
+    private func play(_ player: AVAudioPlayer?) {
+        guard let player else { return }
+        try? AVAudioSession.sharedInstance().setCategory(.ambient, options: [.mixWithOthers])
+        try? AVAudioSession.sharedInstance().setActive(true)
+        if player.isPlaying {
+            player.currentTime = 0
+        } else {
+            player.play()
+        }
+    }
+
+    private static func makePlayer(
+        frequency: Double,
+        duration: Double,
+        amplitude: Double,
+        releaseDuration: Double
+    ) -> AVAudioPlayer? {
+        let wavData = makeWAVData(
+            frequency: frequency,
+            duration: duration,
+            amplitude: amplitude,
+            releaseDuration: releaseDuration
+        )
+        let player = try? AVAudioPlayer(data: wavData)
+        player?.prepareToPlay()
+        return player
+    }
+
+    private static func makeWAVData(
+        frequency: Double,
+        duration: Double,
+        amplitude: Double,
+        releaseDuration: Double
+    ) -> Data {
+        let sampleRate = 44_100
+        let frameCount = max(1, Int(Double(sampleRate) * duration))
+        let attackFrames = max(1, Int(Double(sampleRate) * 0.008))
+        let releaseFrames = max(1, Int(Double(sampleRate) * releaseDuration))
+        let dataByteCount = frameCount * MemoryLayout<Int16>.size
+
+        var data = Data(capacity: 44 + dataByteCount)
+        data.append(contentsOf: "RIFF".utf8)
+        data.appendLittleEndian(UInt32(36 + dataByteCount))
+        data.append(contentsOf: "WAVE".utf8)
+        data.append(contentsOf: "fmt ".utf8)
+        data.appendLittleEndian(UInt32(16))
+        data.appendLittleEndian(UInt16(1))
+        data.appendLittleEndian(UInt16(1))
+        data.appendLittleEndian(UInt32(sampleRate))
+        data.appendLittleEndian(UInt32(sampleRate * MemoryLayout<Int16>.size))
+        data.appendLittleEndian(UInt16(MemoryLayout<Int16>.size))
+        data.appendLittleEndian(UInt16(16))
+        data.append(contentsOf: "data".utf8)
+        data.appendLittleEndian(UInt32(dataByteCount))
+
+        for frame in 0..<frameCount {
+            let attackEnvelope = min(1.0, Double(frame) / Double(attackFrames))
+            let framesRemaining = frameCount - 1 - frame
+            let releaseEnvelope = min(1.0, Double(framesRemaining) / Double(releaseFrames))
+            let envelope = min(attackEnvelope, releaseEnvelope)
+
+            let angle = 2.0 * Double.pi * frequency * Double(frame) / Double(sampleRate)
+            let sampleValue = sin(angle) * amplitude * envelope
+            let pcmSample = Int16(max(-1.0, min(1.0, sampleValue)) * Double(Int16.max))
+            data.appendLittleEndian(pcmSample)
+        }
+
+        return data
+    }
+}
+
+private extension Data {
+    mutating func appendLittleEndian<T: FixedWidthInteger>(_ value: T) {
+        var littleEndian = value.littleEndian
+        Swift.withUnsafeBytes(of: &littleEndian) { buffer in
+            append(buffer.bindMemory(to: UInt8.self))
         }
     }
 }
@@ -33,8 +219,11 @@ final class WorkoutTimer: ObservableObject {
     @Published private(set) var isActive = false
     @Published private(set) var isComplete = false
 
+    private let soundPlayer = CountdownSoundPlayer()
+    private let liveActivityManager = WorkoutLiveActivityManager()
     private var endDate: Date?
     private var pausedRemainingTime: TimeInterval?
+    private var lastBeepedSecond: Int?
     private var timer: AnyCancellable?
 
     var phaseDuration: Int {
@@ -115,6 +304,8 @@ final class WorkoutTimer: ObservableObject {
         isRunning = true
         pausedRemainingTime = nil
         endDate = Date().addingTimeInterval(TimeInterval(remainingSeconds))
+        triggerCountdownBeepIfNeeded(for: remainingSeconds)
+        liveActivityManager.start(rounds: rounds, state: currentActivityState)
     }
 
     func pauseOrResume() {
@@ -130,6 +321,7 @@ final class WorkoutTimer: ObservableObject {
             endDate = Date().addingTimeInterval(pausedRemainingTime ?? TimeInterval(remainingSeconds))
             pausedRemainingTime = nil
         }
+        liveActivityManager.update(state: currentActivityState)
     }
 
     func skipInterval() {
@@ -138,6 +330,7 @@ final class WorkoutTimer: ObservableObject {
     }
 
     func stop() {
+        liveActivityManager.end()
         resetState()
     }
 
@@ -145,13 +338,21 @@ final class WorkoutTimer: ObservableObject {
         guard isRunning, let endDate else { return }
         let seconds = Int(ceil(endDate.timeIntervalSinceNow))
         if seconds <= 0 {
-            advanceInterval()
+            soundPlayer.playTransitionTone()
+            advanceInterval(suppressInitialBeep: true)
         } else {
             remainingSeconds = seconds
+            triggerCountdownBeepIfNeeded(for: seconds)
         }
     }
 
-    private func advanceInterval() {
+    private func triggerCountdownBeepIfNeeded(for seconds: Int) {
+        guard (1...3).contains(seconds), lastBeepedSecond != seconds else { return }
+        lastBeepedSecond = seconds
+        soundPlayer.playCountdownBeep()
+    }
+
+    private func advanceInterval(suppressInitialBeep: Bool = false) {
         switch phase {
         case .preparation:
             phase = .work
@@ -173,7 +374,9 @@ final class WorkoutTimer: ObservableObject {
         }
         remainingSeconds = phaseDuration
         pausedRemainingTime = nil
+        lastBeepedSecond = suppressInitialBeep && (1...3).contains(remainingSeconds) ? remainingSeconds : nil
         endDate = isRunning ? Date().addingTimeInterval(TimeInterval(remainingSeconds)) : nil
+        liveActivityManager.update(state: currentActivityState)
     }
 
     private func finish() {
@@ -183,6 +386,8 @@ final class WorkoutTimer: ObservableObject {
         remainingSeconds = 0
         endDate = nil
         pausedRemainingTime = nil
+        lastBeepedSecond = nil
+        liveActivityManager.update(state: currentActivityState)
     }
 
     private func resetState() {
@@ -194,5 +399,23 @@ final class WorkoutTimer: ObservableObject {
         isComplete = false
         endDate = nil
         pausedRemainingTime = nil
+        lastBeepedSecond = nil
+    }
+
+    private var currentActivityState: RepTimerActivityAttributes.ContentState {
+        let next = nextInterval
+        return RepTimerActivityAttributes.ContentState(
+            phaseRawValue: phase.rawValue,
+            phaseTitle: phase.title,
+            currentRound: currentRound,
+            totalRounds: rounds,
+            remainingSeconds: remainingSeconds,
+            phaseDuration: phaseDuration,
+            endDate: endDate,
+            isRunning: isRunning,
+            isComplete: isComplete,
+            nextPhaseTitle: next?.0.title,
+            nextPhaseSeconds: next?.1
+        )
     }
 }

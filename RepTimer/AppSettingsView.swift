@@ -4,6 +4,7 @@ struct AppSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("tempo.appearance") private var appearanceModeRaw = AppearanceMode.automatic.rawValue
     @AppStorage("tempo.themeColor") private var themeColorRaw = TempoThemeColor.lime.rawValue
+    @AppStorage(CountdownSoundPlayer.settingsKey) private var countdownSoundEnabled = true
 
     private var appearanceMode: AppearanceMode {
         AppearanceMode(rawValue: appearanceModeRaw) ?? .automatic
@@ -12,6 +13,15 @@ struct AppSettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section("SOUND") {
+                    Toggle("Countdown Beeps", isOn: $countdownSoundEnabled)
+                        .tint(TempoPalette.lime)
+
+                    Text("Play a short beep on the final 3 seconds of each interval and a tone when switching phases.")
+                        .font(.footnote)
+                        .foregroundStyle(TempoPalette.muted)
+                }
+
                 Section("APPEARANCE") {
                     Picker("Mode", selection: $appearanceModeRaw) {
                         ForEach(AppearanceMode.allCases) { mode in

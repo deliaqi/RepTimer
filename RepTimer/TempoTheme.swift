@@ -69,10 +69,10 @@ enum TempoPalette {
     static var line: Color { adaptive(light: 0xE3E6DD, dark: 0x39453C) }
     static var forest: Color { adaptive(light: 0x263B2B, dark: 0x0E1811) }
     static var softGreen: Color { adaptive(light: 0xE7EEDC, dark: 0x2D3A30) }
-    static var runningBackground: Color { adaptive(light: 0x171A16, dark: 0x080C09) }
+    static var runningBackground: Color { adaptive(light: 0xF3F4EE, dark: 0x080C09) }
     static var teal: Color { adaptive(light: 0x5B8A86, dark: 0x8CCFC4) }
-    static var preparation: Color { adaptive(light: 0xB9E8DE, dark: 0x467E73) }
-    static var rest: Color { adaptive(light: 0xB6DDB9, dark: 0x456C4B) }
+    static var preparation: Color { adaptive(light: 0x467E73, dark: 0xB9E8DE) }
+    static var rest: Color { adaptive(light: 0x456C4B, dark: 0xB6DDB9) }
     static var lime: Color {
         let rawValue = UserDefaults.standard.string(forKey: "tempo.themeColor") ?? TempoThemeColor.lime.rawValue
         return (TempoThemeColor(rawValue: rawValue) ?? .lime).color

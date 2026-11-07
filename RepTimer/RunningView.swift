@@ -3,15 +3,26 @@ import SwiftUI
 struct RunningView: View {
     @ObservedObject var workout: WorkoutTimer
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         ZStack {
-            TempoPalette.runningBackground.ignoresSafeArea()
+            LinearGradient(
+                colors: [TempoPalette.canvasTop, TempoPalette.canvasBottom],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
             Circle()
-                .fill(TempoPalette.forest.opacity(0.35))
+                .fill(phaseAccent.opacity(colorScheme == .dark ? 0.22 : 0.28))
                 .frame(width: 340, height: 340)
                 .blur(radius: 90)
                 .offset(x: 170, y: -300)
+            Circle()
+                .fill(TempoPalette.teal.opacity(colorScheme == .dark ? 0.18 : 0.25))
+                .frame(width: 280, height: 280)
+                .blur(radius: 85)
+                .offset(x: -180, y: 340)
 
             VStack(spacing: 0) {
                 topBar
@@ -38,7 +49,7 @@ struct RunningView: View {
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.7))
+                    .foregroundStyle(TempoPalette.ink.opacity(0.75))
                     .frame(width: 42, height: 42)
                     .tempoGlass(in: Circle())
             }
@@ -50,14 +61,14 @@ struct RunningView: View {
                 Text("TEMPO")
                     .font(.system(size: 11, weight: .black, design: .rounded))
                     .tracking(2)
-                    .foregroundStyle(.white.opacity(0.82))
+                    .foregroundStyle(TempoPalette.ink.opacity(0.82))
             }
             Spacer()
             Text("\(workout.currentRound) / \(workout.rounds)")
                 .font(.system(size: 12, weight: .bold, design: .rounded).monospacedDigit())
-                .foregroundStyle(.white)
+                .foregroundStyle(TempoPalette.ink)
                 .frame(width: 54, height: 34)
-                .background(.white.opacity(0.08), in: Capsule())
+                .background(TempoPalette.softGreen, in: Capsule())
         }
     }
 
@@ -67,15 +78,15 @@ struct RunningView: View {
                 Text(workout.phase.rawValue)
                     .font(.system(size: 13, weight: .black, design: .rounded))
                     .tracking(3.5)
-                    .foregroundStyle(phaseAccent)
+                    .foregroundStyle(phaseTitleColor)
                 Text(phasePrompt)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.55))
+                    .foregroundStyle(TempoPalette.muted)
             }
 
             ZStack {
                 Circle()
-                    .stroke(.white.opacity(0.08), lineWidth: 11)
+                    .stroke(TempoPalette.line, lineWidth: 11)
                 TimelineView(.animation(
                     minimumInterval: reduceMotion ? 1 : 1.0 / 30.0,
                     paused: !workout.isRunning
@@ -84,13 +95,13 @@ struct RunningView: View {
                         .trim(from: 0, to: max(0.001, min(1, workout.progress(at: timeline.date))))
                         .stroke(phaseAccent, style: StrokeStyle(lineWidth: 11, lineCap: .round))
                         .rotationEffect(.degrees(-90))
-                        .shadow(color: phaseAccent.opacity(0.2), radius: 12)
+                        .shadow(color: phaseAccent.opacity(0.25), radius: 12)
                 }
                 VStack(spacing: 0) {
                     Text(clockString(workout.remainingSeconds))
                         .font(.system(size: 68, weight: .medium, design: .rounded).monospacedDigit())
                         .tracking(-2.5)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(TempoPalette.ink)
                         .contentTransition(.numericText())
                         .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: workout.remainingSeconds)
                         .minimumScaleFactor(0.75)
@@ -98,7 +109,7 @@ struct RunningView: View {
                     Text("REMAINING")
                         .font(.system(size: 9, weight: .bold, design: .rounded))
                         .tracking(2)
-                        .foregroundStyle(.white.opacity(0.42))
+                        .foregroundStyle(TempoPalette.muted)
                         .padding(.top, 4)
                 }
             }
@@ -107,7 +118,7 @@ struct RunningView: View {
             HStack(spacing: 8) {
                 ForEach(1...workout.rounds, id: \.self) { round in
                     Capsule()
-                        .fill(round < workout.currentRound ? TempoPalette.lime : round == workout.currentRound ? .white : .white.opacity(0.14))
+                        .fill(round < workout.currentRound ? TempoPalette.lime : round == workout.currentRound ? TempoPalette.ink : TempoPalette.line)
                         .frame(height: 5)
                 }
             }
@@ -117,30 +128,31 @@ struct RunningView: View {
                 HStack(spacing: 11) {
                     Image(systemName: next.0 == .work ? "dumbbell.fill" : "wind")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(TempoPalette.lime)
+                        .foregroundStyle(colorScheme == .dark ? TempoPalette.lime : TempoPalette.ink)
                         .frame(width: 38, height: 38)
-                        .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .background(TempoPalette.softGreen, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                     VStack(alignment: .leading, spacing: 3) {
                         Text(next.0 == .cooldown ? "UP NEXT · COOLDOWN" : "UP NEXT · ROUND \(next.2)")
                             .font(.system(size: 9, weight: .bold, design: .rounded))
                             .tracking(1)
-                            .foregroundStyle(.white.opacity(0.43))
+                            .foregroundStyle(TempoPalette.muted)
                         Text("\(next.0.title) · \(clockString(next.1))")
                             .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white.opacity(0.9))
+                            .foregroundStyle(TempoPalette.ink)
                     }
                     Spacer()
                     Image(systemName: "arrow.right")
                         .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(.white.opacity(0.3))
+                        .foregroundStyle(TempoPalette.muted)
                 }
                 .padding(13)
-                .background(.white.opacity(0.055), in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+                .background(TempoPalette.card, in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 17, style: .continuous).stroke(TempoPalette.line.opacity(0.8), lineWidth: 1))
             } else {
                 Text(workout.phase == .cooldown ? "COOLDOWN · FINISH STRONG" : "FINAL SET · FINISH STRONG")
                     .font(.system(size: 10, weight: .bold, design: .rounded))
                     .tracking(1.5)
-                    .foregroundStyle(.white.opacity(0.45))
+                    .foregroundStyle(TempoPalette.muted)
                     .padding(.top, 2)
             }
         }
@@ -159,14 +171,14 @@ struct RunningView: View {
                     .font(.system(size: 31, weight: .black, design: .rounded))
                     .tracking(-0.7)
                     .multilineTextAlignment(.center)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(TempoPalette.ink)
                 Text("That’s another one in the books.")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.55))
+                    .foregroundStyle(TempoPalette.muted)
             }
             HStack(spacing: 28) {
                 stat(value: "\(workout.rounds)", label: "ROUNDS")
-                Rectangle().fill(.white.opacity(0.12)).frame(width: 1, height: 35)
+                Rectangle().fill(TempoPalette.line).frame(width: 1, height: 35)
                 stat(value: clockString(workout.totalWorkoutSeconds), label: "SESSION")
             }
             .padding(.top, 9)
@@ -175,7 +187,8 @@ struct RunningView: View {
     }
 
     private var controls: some View {
-        Group {
+        let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
+        return Group {
             if workout.isComplete {
                 Button {
                     workout.stop()
@@ -185,7 +198,8 @@ struct RunningView: View {
                         .foregroundStyle(TempoPalette.accentInk)
                         .frame(maxWidth: .infinity)
                         .frame(height: 56)
-                        .background(TempoPalette.lime, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .background(TempoPalette.lime.opacity(0.75), in: shape)
+                        .tempoGlass(in: shape, tint: TempoPalette.lime)
                 }
                 .buttonStyle(.plain)
             } else {
@@ -202,7 +216,8 @@ struct RunningView: View {
                         .foregroundStyle(TempoPalette.accentInk)
                         .frame(maxWidth: .infinity)
                         .frame(height: 56)
-                        .background(TempoPalette.lime, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .background(TempoPalette.lime.opacity(0.75), in: shape)
+                        .tempoGlass(in: shape, tint: TempoPalette.lime)
                     }
                     .buttonStyle(.plain)
 
@@ -211,9 +226,9 @@ struct RunningView: View {
                     } label: {
                         Image(systemName: "forward.end.fill")
                             .font(.system(size: 17, weight: .semibold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(TempoPalette.ink)
                             .frame(width: 58, height: 56)
-                            .tempoGlass(in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            .tempoGlass(in: shape)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Skip interval")
@@ -226,11 +241,11 @@ struct RunningView: View {
         VStack(spacing: 4) {
             Text(value)
                 .font(.system(size: 17, weight: .bold, design: .rounded).monospacedDigit())
-                .foregroundStyle(.white)
+                .foregroundStyle(TempoPalette.ink)
             Text(label)
                 .font(.system(size: 8, weight: .bold, design: .rounded))
                 .tracking(1.3)
-                .foregroundStyle(.white.opacity(0.4))
+                .foregroundStyle(TempoPalette.muted)
         }
     }
 
@@ -241,6 +256,13 @@ struct RunningView: View {
         case .rest: TempoPalette.rest
         case .cooldown: TempoPalette.teal
         }
+    }
+
+    private var phaseTitleColor: Color {
+        if colorScheme == .light, workout.phase == .work {
+            return TempoPalette.forest
+        }
+        return phaseAccent
     }
 
     private var phasePrompt: String {

@@ -164,7 +164,7 @@ struct ContentView: View {
         HStack(spacing: 10) {
             ZStack {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(TempoPalette.runningBackground)
+                    .fill(TempoPalette.accentInk)
                     .frame(width: 40, height: 40)
                 Image(systemName: "stopwatch.fill")
                     .font(.system(size: 18, weight: .semibold))
