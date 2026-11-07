@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Top crown stem -->
+  <rect x="466" y="128" width="92" height="138" rx="30" fill="#D8FF55" />
+  <!-- Top crown cap -->
+  <rect x="442" y="114" width="140" height="44" rx="18" fill="#E8F5C8" />
+  <!-- Outer stopwatch bezel ring (r=310 outer, r=274 inner) -->
+  <path fill="#E8F5C8" fill-rule="evenodd" d="M 512 214 A 310 310 0 1 0 512 834 A 310 310 0 1 0 512 214 Z M 512 250 A 274 274 0 1 1 512 798 A 274 274 0 1 1 512 250 Z" />
+  <!-- Subtle inner progress track -->
+  <circle cx="512" cy="524" r="252" fill="none" stroke="#E8F5C8" stroke-width="13" stroke-opacity="0.22" />
+</svg>

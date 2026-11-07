@@ -18,6 +18,7 @@
 		3B26F9A6309ECCB30065562B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B26F9A5309ECCB30065562B /* WidgetKit.framework */; };
 		3B26F9A8309ECCB30065562B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B26F9A7309ECCB30065562B /* SwiftUI.framework */; };
 		3B26F9B3309ECCB40065562B /* RepTimerWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3B26F9A3309ECCB30065562B /* RepTimerWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3B6DDC95309EF11C0061324E /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 3B6DDC94309EF11C0061324E /* AppIcon.icon */; };
 		A10000000000000000000001 /* RepTimerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* RepTimerApp.swift */; };
 		A10000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* ContentView.swift */; };
 		A10000000000000000000003 /* WorkoutTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* WorkoutTimer.swift */; };
@@ -60,6 +61,7 @@
 		3B26F9A3309ECCB30065562B /* RepTimerWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RepTimerWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B26F9A5309ECCB30065562B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = /System/Library/Frameworks/WidgetKit.framework; sourceTree = "<absolute>"; };
 		3B26F9A7309ECCB30065562B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = /System/Library/Frameworks/SwiftUI.framework; sourceTree = "<absolute>"; };
+		3B6DDC94309EF11C0061324E /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		A20000000000000000000001 /* RepTimerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepTimerApp.swift; sourceTree = "<group>"; };
 		A20000000000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A20000000000000000000003 /* WorkoutTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutTimer.swift; sourceTree = "<group>"; };
@@ -135,6 +137,7 @@
 				3B25232F309EBA9F00608F64 /* StepperViews.swift */,
 				3B252331309EBACC00608F64 /* DurationEditorSheet.swift */,
 				3B252333309EBACD00608F64 /* RunningView.swift */,
+				3B6DDC94309EF11C0061324E /* AppIcon.icon */,
 			);
 			path = RepTimer;
 			sourceTree = "<group>";
@@ -242,6 +245,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000004 /* Assets.xcassets in Resources */,
+				3B6DDC95309EF11C0061324E /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -499,6 +503,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -530,6 +535,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;

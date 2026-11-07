@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Round / minute hand -->
+  <line x1="512" y1="524" x2="421" y2="430" stroke="#E8F5C8" stroke-width="25" stroke-linecap="round" />
+  <!-- Active interval second hand -->
+  <line x1="512" y1="524" x2="625" y2="376" stroke="#D8FF55" stroke-width="20" stroke-linecap="round" />
+  <!-- Center pivot cap with pinhole cutout -->
+  <path fill="#D8FF55" fill-rule="evenodd" d="M 512 500 A 24 24 0 1 0 512 548 A 24 24 0 1 0 512 500 Z M 512 515 A 9 9 0 1 1 512 533 A 9 9 0 1 1 512 515 Z" />
+</svg>
