@@ -88,14 +88,10 @@ struct RepTimerLiveActivity: Widget {
                     .padding(.top, 2)
                 }
             } compactLeading: {
-                HStack(spacing: 5) {
-                    Image(systemName: phaseSymbol(for: state))
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(accent)
-                    Text(compactPhaseLabel(for: state))
-                        .font(.system(size: 11, weight: .black, design: .rounded))
-                        .foregroundStyle(accent)
-                }
+                Image(systemName: phaseSymbol(for: state))
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(accent)
+                    .accessibilityLabel(state.phaseTitle)
             } compactTrailing: {
                 Group {
                     if state.isComplete {
@@ -104,20 +100,25 @@ struct RepTimerLiveActivity: Widget {
                     } else if state.isRunning, let endDate = state.endDate {
                         Text(timerInterval: Date.now...endDate, countsDown: true)
                             .monospacedDigit()
+                            .multilineTextAlignment(.trailing)
                             .font(.system(size: 13, weight: .bold, design: .rounded))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.1)
                             .foregroundStyle(.white)
-                            .frame(maxWidth: 52)
+                            .frame(maxWidth: 52, alignment: .trailing)
                     } else {
                         Text(formatClock(state.remainingSeconds))
                             .monospacedDigit()
+                            .multilineTextAlignment(.trailing)
                             .font(.system(size: 13, weight: .bold, design: .rounded))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.1)
                             .foregroundStyle(.white.opacity(0.75))
+                            .frame(maxWidth: 52, alignment: .trailing)
                     }
                 }
             } minimal: {
-                Image(systemName: phaseSymbol(for: state))
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(accent)
+                minimalCountdownView(for: state, tint: accent)
             }
             .keylineTint(accent)
         }
@@ -189,6 +190,40 @@ private struct LockScreenLiveActivityView: View {
 }
 
 @ViewBuilder
+private func minimalCountdownView(for state: RepTimerActivityAttributes.ContentState, tint: Color) -> some View {
+    if state.isComplete {
+        Image(systemName: "checkmark.circle.fill")
+            .font(.system(size: 13, weight: .bold))
+            .foregroundStyle(tint)
+            .frame(maxWidth: 28, maxHeight: 28)
+            .accessibilityLabel("Workout complete")
+    } else if state.isRunning, let endDate = state.endDate {
+        let startDate = endDate.addingTimeInterval(-TimeInterval(max(1, state.phaseDuration)))
+        ProgressView(timerInterval: startDate...endDate, countsDown: true) {
+            EmptyView()
+        } currentValueLabel: {
+            EmptyView()
+        }
+        .progressViewStyle(.circular)
+        .tint(tint)
+        .frame(maxWidth: 28, maxHeight: 28)
+        .accessibilityLabel("\(state.phaseTitle), round \(state.currentRound) of \(state.totalRounds)")
+    } else {
+        let total = Double(max(1, state.phaseDuration))
+        let remaining = Double(max(0, min(state.phaseDuration, state.remainingSeconds)))
+        ProgressView(value: remaining, total: total) {
+            EmptyView()
+        } currentValueLabel: {
+            EmptyView()
+        }
+        .progressViewStyle(.circular)
+        .tint(tint)
+        .frame(maxWidth: 28, maxHeight: 28)
+        .accessibilityLabel("Paused, \(state.phaseTitle), \(formatClock(state.remainingSeconds)) remaining")
+    }
+}
+
+@ViewBuilder
 private func countdownText(for state: RepTimerActivityAttributes.ContentState) -> some View {
     if state.isComplete {
         Text("Done")
@@ -241,14 +276,6 @@ private func phaseSymbol(for state: RepTimerActivityAttributes.ContentState) -> 
     case "REST": return "wind"
     case "COOLDOWN": return "figure.cooldown"
     default: return "stopwatch.fill"
-    }
-}
-
-private func compactPhaseLabel(for state: RepTimerActivityAttributes.ContentState) -> String {
-    if state.isComplete { return "DONE" }
-    switch state.phaseRawValue {
-    case "COOLDOWN": return "COOL"
-    default: return state.phaseRawValue
     }
 }
 
