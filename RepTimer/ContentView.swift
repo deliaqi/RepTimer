@@ -31,18 +31,32 @@ private struct NavigationScrollStateModifier: ViewModifier {
 }
 
 struct ContentView: View {
-    @StateObject private var workout = WorkoutTimer()
+    private static let customPresetsKey = "tempo.customPresets"
+    private static let presetOrderKey = "tempo.presetOrder"
+    private static let lastUsedPresetKey = "tempo.lastUsedPresetID"
+
+    @StateObject private var workout: WorkoutTimer
     @AppStorage("tempo.appearance") private var appearanceModeRaw = AppearanceMode.automatic.rawValue
     @AppStorage("tempo.themeColor") private var themeColorRaw = TempoThemeColor.lime.rawValue
     @State private var selectedPreset: String?
     @State private var editingDuration: EditableDuration?
     @State private var editingPreset: TimerPreset?
     @State private var isSettingsPresented = false
-    @State private var customPresets = Self.loadCustomPresets()
-    @State private var presetOrder = UserDefaults.standard.stringArray(forKey: "tempo.presetOrder") ?? []
+    @State private var customPresets: [TimerPreset]
+    @State private var presetOrder: [String]
     @State private var isSavePresetPromptPresented = false
     @State private var presetNameDraft = ""
     @State private var isNavigationBlurred = false
+
+    init() {
+        let loadedPresets = Self.loadCustomPresets()
+        let loadedOrder = UserDefaults.standard.stringArray(forKey: Self.presetOrderKey) ?? []
+        let lastPreset = Self.loadLastUsedPreset(from: loadedPresets, presetOrder: loadedOrder)
+        _workout = StateObject(wrappedValue: WorkoutTimer(preset: lastPreset))
+        _selectedPreset = State(initialValue: lastPreset?.id)
+        _customPresets = State(initialValue: loadedPresets)
+        _presetOrder = State(initialValue: loadedOrder)
+    }
 
     private var allPresets: [TimerPreset] {
         let presets = customPresets
@@ -55,11 +69,26 @@ struct ContentView: View {
     }
 
     private static func loadCustomPresets() -> [TimerPreset] {
-        guard let data = UserDefaults.standard.data(forKey: "tempo.customPresets"),
+        guard let data = UserDefaults.standard.data(forKey: customPresetsKey),
               let presets = try? JSONDecoder().decode([TimerPreset].self, from: data) else {
             return []
         }
         return presets
+    }
+
+    private static func loadLastUsedPreset(from presets: [TimerPreset], presetOrder: [String]) -> TimerPreset? {
+        // Distinguish an explicitly cleared value ("") from an unmigrated install (nil).
+        if UserDefaults.standard.object(forKey: lastUsedPresetKey) != nil {
+            guard let lastPresetID = UserDefaults.standard.string(forKey: lastUsedPresetKey),
+                  !lastPresetID.isEmpty else {
+                return nil
+            }
+            return presets.first { $0.id == lastPresetID }
+        }
+        guard let mostRecentID = presetOrder.first else {
+            return nil
+        }
+        return presets.first { $0.id == mostRecentID }
     }
 
     private var selectedAppearance: AppearanceMode {
@@ -423,6 +452,10 @@ struct ContentView: View {
                     .background(TempoPalette.softGreen, in: Capsule())
             }
             Button {
+                if let selectedPreset {
+                    UserDefaults.standard.set(selectedPreset, forKey: Self.lastUsedPresetKey)
+                    markPresetUsed(selectedPreset)
+                }
                 workout.start()
             } label: {
                 HStack(spacing: 10) {
@@ -562,15 +595,8 @@ struct ContentView: View {
 
     private func applyPreset(_ preset: TimerPreset) {
         selectedPreset = preset.id
-        workout.apply(
-            work: preset.work,
-            rest: preset.rest,
-            rounds: preset.rounds,
-            preparationSeconds: preset.preparationSeconds,
-            preparationEnabled: preset.preparationEnabled,
-            cooldownSeconds: preset.cooldownSeconds,
-            cooldownEnabled: preset.cooldownEnabled
-        )
+        workout.apply(preset)
+        UserDefaults.standard.set(preset.id, forKey: Self.lastUsedPresetKey)
         markPresetUsed(preset.id)
     }
 
@@ -584,11 +610,14 @@ struct ContentView: View {
         }
         customPresets.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         if let data = try? JSONEncoder().encode(customPresets) {
-            UserDefaults.standard.set(data, forKey: "tempo.customPresets")
+            UserDefaults.standard.set(data, forKey: Self.customPresetsKey)
         }
         if isNew || wasSelected {
             applyPreset(preset)
         } else {
+            if let selectedPreset, UserDefaults.standard.object(forKey: Self.lastUsedPresetKey) == nil {
+                UserDefaults.standard.set(selectedPreset, forKey: Self.lastUsedPresetKey)
+            }
             markPresetUsed(preset.id)
         }
     }
@@ -615,16 +644,20 @@ struct ContentView: View {
     private func markPresetUsed(_ id: String) {
         presetOrder.removeAll { $0 == id }
         presetOrder.insert(id, at: 0)
-        UserDefaults.standard.set(presetOrder, forKey: "tempo.presetOrder")
+        UserDefaults.standard.set(presetOrder, forKey: Self.presetOrderKey)
     }
 
     private func deletePreset(_ preset: TimerPreset) {
         customPresets.removeAll { $0.id == preset.id }
         presetOrder.removeAll { $0 == preset.id }
         if let data = try? JSONEncoder().encode(customPresets) {
-            UserDefaults.standard.set(data, forKey: "tempo.customPresets")
+            UserDefaults.standard.set(data, forKey: Self.customPresetsKey)
         }
-        UserDefaults.standard.set(presetOrder, forKey: "tempo.presetOrder")
-        if selectedPreset == preset.id { selectedPreset = nil }
+        UserDefaults.standard.set(presetOrder, forKey: Self.presetOrderKey)
+        let wasSelected = selectedPreset == preset.id
+        if wasSelected { selectedPreset = nil }
+        if wasSelected || UserDefaults.standard.string(forKey: Self.lastUsedPresetKey) == preset.id {
+            UserDefaults.standard.set("", forKey: Self.lastUsedPresetKey)
+        }
     }
 }

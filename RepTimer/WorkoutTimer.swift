@@ -270,12 +270,27 @@ final class WorkoutTimer: ObservableObject {
         return nil
     }
 
-    init() {
+    init(preset: TimerPreset? = nil) {
+        if let preset {
+            apply(preset)
+        }
         timer = Timer.publish(every: 0.2, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
                 self?.refreshCountdown()
             }
+    }
+
+    func apply(_ preset: TimerPreset) {
+        apply(
+            work: preset.work,
+            rest: preset.rest,
+            rounds: preset.rounds,
+            preparationSeconds: preset.preparationSeconds,
+            preparationEnabled: preset.preparationEnabled,
+            cooldownSeconds: preset.cooldownSeconds,
+            cooldownEnabled: preset.cooldownEnabled
+        )
     }
 
     func apply(
