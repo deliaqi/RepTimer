@@ -18,6 +18,7 @@
 		3B26F9A6309ECCB30065562B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B26F9A5309ECCB30065562B /* WidgetKit.framework */; };
 		3B26F9A8309ECCB30065562B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B26F9A7309ECCB30065562B /* SwiftUI.framework */; };
 		3B26F9B3309ECCB40065562B /* RepTimerWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3B26F9A3309ECCB30065562B /* RepTimerWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3B5A728B30B6A53D00C3C526 /* CalorieCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5A728A30B6A53D00C3C526 /* CalorieCore.swift */; };
 		3B6DDC95309EF11C0061324E /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 3B6DDC94309EF11C0061324E /* AppIcon.icon */; };
 		A10000000000000000000001 /* RepTimerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* RepTimerApp.swift */; };
 		A10000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* ContentView.swift */; };
@@ -61,6 +62,9 @@
 		3B26F9A3309ECCB30065562B /* RepTimerWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RepTimerWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B26F9A5309ECCB30065562B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = /System/Library/Frameworks/WidgetKit.framework; sourceTree = "<absolute>"; };
 		3B26F9A7309ECCB30065562B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = /System/Library/Frameworks/SwiftUI.framework; sourceTree = "<absolute>"; };
+		3B5A728830B6A4C600C3C526 /* RepTimer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RepTimer.entitlements; sourceTree = "<group>"; };
+		3B5A728930B6A4C800C3C526 /* RepTimerWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RepTimerWidgetExtension.entitlements; sourceTree = "<group>"; };
+		3B5A728A30B6A53D00C3C526 /* CalorieCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalorieCore.swift; sourceTree = "<group>"; };
 		3B6DDC94309EF11C0061324E /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		A20000000000000000000001 /* RepTimerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepTimerApp.swift; sourceTree = "<group>"; };
 		A20000000000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -115,6 +119,7 @@
 		A40000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				3B5A728930B6A4C800C3C526 /* RepTimerWidgetExtension.entitlements */,
 				A40000000000000000000002 /* RepTimer */,
 				3B26F9A9309ECCB30065562B /* RepTimerWidget */,
 				3B26F9A4309ECCB30065562B /* Frameworks */,
@@ -125,6 +130,7 @@
 		A40000000000000000000002 /* RepTimer */ = {
 			isa = PBXGroup;
 			children = (
+				3B5A728830B6A4C600C3C526 /* RepTimer.entitlements */,
 				A20000000000000000000001 /* RepTimerApp.swift */,
 				A20000000000000000000002 /* ContentView.swift */,
 				A20000000000000000000003 /* WorkoutTimer.swift */,
@@ -138,6 +144,7 @@
 				3B252331309EBACC00608F64 /* DurationEditorSheet.swift */,
 				3B252333309EBACD00608F64 /* RunningView.swift */,
 				3B6DDC94309EF11C0061324E /* AppIcon.icon */,
+				3B5A728A30B6A53D00C3C526 /* CalorieCore.swift */,
 			);
 			path = RepTimer;
 			sourceTree = "<group>";
@@ -263,6 +270,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3B5A728B30B6A53D00C3C526 /* CalorieCore.swift in Sources */,
 				3B25232C309EBA8300608F64 /* PresetCard.swift in Sources */,
 				3B252330309EBA9F00608F64 /* StepperViews.swift in Sources */,
 				A10000000000000000000001 /* RepTimerApp.swift in Sources */,
@@ -302,6 +310,7 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = RepTimerWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
@@ -320,6 +329,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RepTimerWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = RepTimerWidget;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Tempo reads your daily dietary energy consumed and active energy burned from Apple Health to display your remaining daily calories.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.6;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -339,6 +349,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.codex.Tempo.RepTimerWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -368,6 +379,7 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = RepTimerWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
@@ -381,6 +393,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RepTimerWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = RepTimerWidget;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Tempo reads your daily dietary energy consumed and active energy burned from Apple Health to display your remaining daily calories.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.6;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -400,6 +413,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.codex.Tempo.RepTimerWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -505,6 +519,7 @@
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_ENTITLEMENTS = RepTimer/RepTimer.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
@@ -512,6 +527,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Tempo;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Tempo reads your daily dietary energy consumed and active energy burned from Apple Health to calculate your remaining daily calories for the widget.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -523,6 +539,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.codex.Tempo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				REGISTER_APP_GROUPS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -537,6 +554,7 @@
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_ENTITLEMENTS = RepTimer/RepTimer.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
@@ -544,6 +562,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Tempo;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Tempo reads your daily dietary energy consumed and active energy burned from Apple Health to calculate your remaining daily calories for the widget.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -555,6 +574,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.codex.Tempo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				REGISTER_APP_GROUPS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

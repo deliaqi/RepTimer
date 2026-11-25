@@ -5,5 +5,6 @@ import WidgetKit
 struct RepTimerWidgetBundle: WidgetBundle {
     var body: some Widget {
         RepTimerLiveActivity()
+        DailyCaloriesWidget()
     }
 }

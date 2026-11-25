@@ -129,6 +129,12 @@ struct ContentView: View {
                 .presentationDragIndicator(.visible)
                 .preferredColorScheme(selectedAppearance.preferredColorScheme)
         }
+        .onOpenURL { url in
+            if url.scheme == CalorieSharedConfig.settingsDeepLinkScheme,
+               url.host == CalorieSharedConfig.settingsDeepLinkHost {
+                isSettingsPresented = true
+            }
+        }
         .alert("Save Preset", isPresented: $isSavePresetPromptPresented) {
             TextField("Preset name", text: $presetNameDraft)
                 .textInputAutocapitalization(.words)
