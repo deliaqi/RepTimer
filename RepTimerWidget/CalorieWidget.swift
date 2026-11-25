@@ -115,7 +115,7 @@ private struct DailyCaloriesWidgetContainerView: View {
             .widgetURL(CalorieSharedConfig.settingsDeepLinkURL)
             .containerBackground(for: .widget) {
                 if colorScheme == .dark {
-                    Color(red: 0.08, green: 0.09, blue: 0.10)
+                    Color(red: 0.04, green: 0.045, blue: 0.05)
                 } else {
                     Color.white
                 }

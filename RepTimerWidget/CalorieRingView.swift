@@ -130,25 +130,25 @@ struct CalorieRingGraphic: View {
 
     private var consumedBlue: Color {
         colorScheme == .dark
-            ? Color(red: 0.22, green: 0.58, blue: 1.00)
+            ? Color(red: 0.11, green: 0.41, blue: 0.78)
             : Color(red: 0.13, green: 0.51, blue: 0.96)
     }
 
     private var remainingOrange: Color {
         colorScheme == .dark
-            ? Color(red: 1.00, green: 0.63, blue: 0.22)
+            ? Color(red: 0.78, green: 0.46, blue: 0.13)
             : Color(red: 0.96, green: 0.58, blue: 0.16)
     }
 
     private var overStripeDark: Color {
         colorScheme == .dark
-            ? Color(red: 0.08, green: 0.30, blue: 0.69)
+            ? Color(red: 0.04, green: 0.19, blue: 0.45)
             : Color(red: 0.05, green: 0.25, blue: 0.59)
     }
 
     private var overStripeLight: Color {
         colorScheme == .dark
-            ? Color(red: 0.62, green: 0.80, blue: 1.00)
+            ? Color(red: 0.46, green: 0.60, blue: 0.78)
             : Color(red: 0.65, green: 0.80, blue: 0.98)
     }
 
