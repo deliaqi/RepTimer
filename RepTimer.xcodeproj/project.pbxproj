@@ -18,8 +18,14 @@
 		3B26F9A6309ECCB30065562B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B26F9A5309ECCB30065562B /* WidgetKit.framework */; };
 		3B26F9A8309ECCB30065562B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B26F9A7309ECCB30065562B /* SwiftUI.framework */; };
 		3B26F9B3309ECCB40065562B /* RepTimerWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3B26F9A3309ECCB30065562B /* RepTimerWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		3B5A728B30B6A53D00C3C526 /* CalorieCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5A728A30B6A53D00C3C526 /* CalorieCore.swift */; };
+		3B5A728B30B6A53D00C3C526 /* CalorieHealthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5A728A30B6A53D00C3C526 /* CalorieHealthManager.swift */; };
 		3B6DDC95309EF11C0061324E /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 3B6DDC94309EF11C0061324E /* AppIcon.icon */; };
+		3BD1049630B7F3C700B47043 /* WorkoutPhase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD1049530B7F3C700B47043 /* WorkoutPhase.swift */; };
+		3BD1049830B7F3CB00B47043 /* RepTimerActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD1049730B7F3CB00B47043 /* RepTimerActivityAttributes.swift */; };
+		3BD1049A30B7F3CE00B47043 /* CalorieModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD1049930B7F3CE00B47043 /* CalorieModels.swift */; };
+		3BD1049C30B7F3D600B47043 /* WorkoutLiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD1049B30B7F3D600B47043 /* WorkoutLiveActivityManager.swift */; };
+		3BD1049E30B7F3D900B47043 /* CountdownSoundPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD1049D30B7F3D900B47043 /* CountdownSoundPlayer.swift */; };
+		3BD104A030B7F3DA00B47043 /* CalorieStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD1049F30B7F3DA00B47043 /* CalorieStore.swift */; };
 		A10000000000000000000001 /* RepTimerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* RepTimerApp.swift */; };
 		A10000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* ContentView.swift */; };
 		A10000000000000000000003 /* WorkoutTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* WorkoutTimer.swift */; };
@@ -64,8 +70,14 @@
 		3B26F9A7309ECCB30065562B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = /System/Library/Frameworks/SwiftUI.framework; sourceTree = "<absolute>"; };
 		3B5A728830B6A4C600C3C526 /* RepTimer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RepTimer.entitlements; sourceTree = "<group>"; };
 		3B5A728930B6A4C800C3C526 /* RepTimerWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RepTimerWidgetExtension.entitlements; sourceTree = "<group>"; };
-		3B5A728A30B6A53D00C3C526 /* CalorieCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalorieCore.swift; sourceTree = "<group>"; };
+		3B5A728A30B6A53D00C3C526 /* CalorieHealthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalorieHealthManager.swift; sourceTree = "<group>"; };
 		3B6DDC94309EF11C0061324E /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		3BD1049530B7F3C700B47043 /* WorkoutPhase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutPhase.swift; sourceTree = "<group>"; };
+		3BD1049730B7F3CB00B47043 /* RepTimerActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepTimerActivityAttributes.swift; sourceTree = "<group>"; };
+		3BD1049930B7F3CE00B47043 /* CalorieModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalorieModels.swift; sourceTree = "<group>"; };
+		3BD1049B30B7F3D600B47043 /* WorkoutLiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutLiveActivityManager.swift; sourceTree = "<group>"; };
+		3BD1049D30B7F3D900B47043 /* CountdownSoundPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownSoundPlayer.swift; sourceTree = "<group>"; };
+		3BD1049F30B7F3DA00B47043 /* CalorieStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalorieStore.swift; sourceTree = "<group>"; };
 		A20000000000000000000001 /* RepTimerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepTimerApp.swift; sourceTree = "<group>"; };
 		A20000000000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A20000000000000000000003 /* WorkoutTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutTimer.swift; sourceTree = "<group>"; };
@@ -116,6 +128,82 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		3BD1048830B7F39A00B47043 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000001 /* RepTimerApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		3BD1048930B7F39A00B47043 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				3B252327309EBA6E00608F64 /* TimerPreset.swift */,
+				3BD1049530B7F3C700B47043 /* WorkoutPhase.swift */,
+				3BD1049730B7F3CB00B47043 /* RepTimerActivityAttributes.swift */,
+				3BD1049930B7F3CE00B47043 /* CalorieModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		3BD1048A30B7F39B00B47043 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000003 /* WorkoutTimer.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		3BD1048B30B7F39B00B47043 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				3B5A728A30B6A53D00C3C526 /* CalorieHealthManager.swift */,
+				3BD1049B30B7F3D600B47043 /* WorkoutLiveActivityManager.swift */,
+				3BD1049D30B7F3D900B47043 /* CountdownSoundPlayer.swift */,
+				3BD1049F30B7F3DA00B47043 /* CalorieStore.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		3BD1048C30B7F39C00B47043 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				3B252325309EBA6700608F64 /* TempoTheme.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		3BD1048D30B7F39C00B47043 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				3BD1048E30B7F3A000B47043 /* Components */,
+				3BD1048F30B7F3A100B47043 /* Sheets */,
+				A20000000000000000000002 /* ContentView.swift */,
+				3B252333309EBACD00608F64 /* RunningView.swift */,
+				3B252329309EBA7B00608F64 /* AppSettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		3BD1048E30B7F3A000B47043 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				3B25232B309EBA8300608F64 /* PresetCard.swift */,
+				3B25232F309EBA9F00608F64 /* StepperViews.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		3BD1048F30B7F3A100B47043 /* Sheets */ = {
+			isa = PBXGroup;
+			children = (
+				3B25232D309EBA8A00608F64 /* PresetEditorSheet.swift */,
+				3B252331309EBACC00608F64 /* DurationEditorSheet.swift */,
+			);
+			path = Sheets;
+			sourceTree = "<group>";
+		};
 		A40000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
@@ -131,20 +219,14 @@
 			isa = PBXGroup;
 			children = (
 				3B5A728830B6A4C600C3C526 /* RepTimer.entitlements */,
-				A20000000000000000000001 /* RepTimerApp.swift */,
-				A20000000000000000000002 /* ContentView.swift */,
-				A20000000000000000000003 /* WorkoutTimer.swift */,
 				A20000000000000000000005 /* Assets.xcassets */,
-				3B252325309EBA6700608F64 /* TempoTheme.swift */,
-				3B252327309EBA6E00608F64 /* TimerPreset.swift */,
-				3B252329309EBA7B00608F64 /* AppSettingsView.swift */,
-				3B25232B309EBA8300608F64 /* PresetCard.swift */,
-				3B25232D309EBA8A00608F64 /* PresetEditorSheet.swift */,
-				3B25232F309EBA9F00608F64 /* StepperViews.swift */,
-				3B252331309EBACC00608F64 /* DurationEditorSheet.swift */,
-				3B252333309EBACD00608F64 /* RunningView.swift */,
 				3B6DDC94309EF11C0061324E /* AppIcon.icon */,
-				3B5A728A30B6A53D00C3C526 /* CalorieCore.swift */,
+				3BD1048830B7F39A00B47043 /* App */,
+				3BD1048930B7F39A00B47043 /* Models */,
+				3BD1048A30B7F39B00B47043 /* ViewModels */,
+				3BD1048B30B7F39B00B47043 /* Services */,
+				3BD1048C30B7F39C00B47043 /* Theme */,
+				3BD1048D30B7F39C00B47043 /* Views */,
 			);
 			path = RepTimer;
 			sourceTree = "<group>";
@@ -270,18 +352,24 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B5A728B30B6A53D00C3C526 /* CalorieCore.swift in Sources */,
+				3B5A728B30B6A53D00C3C526 /* CalorieHealthManager.swift in Sources */,
+				3BD104A030B7F3DA00B47043 /* CalorieStore.swift in Sources */,
 				3B25232C309EBA8300608F64 /* PresetCard.swift in Sources */,
+				3BD1049E30B7F3D900B47043 /* CountdownSoundPlayer.swift in Sources */,
 				3B252330309EBA9F00608F64 /* StepperViews.swift in Sources */,
 				A10000000000000000000001 /* RepTimerApp.swift in Sources */,
+				3BD1049630B7F3C700B47043 /* WorkoutPhase.swift in Sources */,
 				3B25232A309EBA7B00608F64 /* AppSettingsView.swift in Sources */,
 				3B252332309EBACC00608F64 /* DurationEditorSheet.swift in Sources */,
 				A10000000000000000000002 /* ContentView.swift in Sources */,
+				3BD1049830B7F3CB00B47043 /* RepTimerActivityAttributes.swift in Sources */,
 				A10000000000000000000003 /* WorkoutTimer.swift in Sources */,
 				3B25232E309EBA8A00608F64 /* PresetEditorSheet.swift in Sources */,
 				3B252326309EBA6700608F64 /* TempoTheme.swift in Sources */,
+				3BD1049C30B7F3D600B47043 /* WorkoutLiveActivityManager.swift in Sources */,
 				3B252334309EBACD00608F64 /* RunningView.swift in Sources */,
 				3B252328309EBA6E00608F64 /* TimerPreset.swift in Sources */,
+				3BD1049A30B7F3CE00B47043 /* CalorieModels.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
