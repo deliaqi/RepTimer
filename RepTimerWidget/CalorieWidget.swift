@@ -14,6 +14,13 @@ struct CalorieWidgetEntry: TimelineEntry {
         isPlaceholder: false
     )
 
+    static let sampleActivityOnlyRemaining = CalorieWidgetEntry(
+        date: .now,
+        summary: .sampleActivityOnlyRemaining,
+        isConfigured: true,
+        isPlaceholder: false
+    )
+
     static let sampleOver = CalorieWidgetEntry(
         date: .now,
         summary: .sampleOver,
@@ -103,6 +110,7 @@ struct DailyCaloriesWidget: Widget {
         .configurationDisplayName("Daily Calories")
         .description("Track consumed and remaining calories for the day from Apple Health.")
         .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryRectangular])
+        .contentMarginsDisabled()
     }
 }
 
@@ -129,6 +137,7 @@ private struct DailyCaloriesWidgetContainerView: View {
     DailyCaloriesWidget()
 } timeline: {
     CalorieWidgetEntry.sampleRemaining
+    CalorieWidgetEntry.sampleActivityOnlyRemaining
     CalorieWidgetEntry.sampleOver
 }
 

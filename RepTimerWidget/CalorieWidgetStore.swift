@@ -46,6 +46,19 @@ struct CalorieSummary: Equatable, Sendable {
         return min(1, max(0, consumedCalories / effectiveBudget))
     }
 
+    /// Fraction of the effective budget coming from the base daily goal (clamped 0...1).
+    /// Marks the ring boundary between the base goal allowance and calories added by activities.
+    var goalBudgetFraction: Double {
+        guard effectiveBudget > 0 else { return 1 }
+        return min(1, max(0, dailyGoal / effectiveBudget))
+    }
+
+    /// Fraction of the effective budget added by active exercise calories (clamped 0...1).
+    var exerciseBudgetFraction: Double {
+        guard effectiveBudget > 0 else { return 0 }
+        return min(1, max(0, exerciseCalories / effectiveBudget))
+    }
+
     /// Fraction of the ring representing the over-budget excess (clamped 0...1).
     var overBudgetFraction: Double {
         guard isOverBudget else { return 0 }
@@ -54,6 +67,12 @@ struct CalorieSummary: Equatable, Sendable {
     }
 
     static let sampleRemaining = CalorieSummary(
+        dailyGoal: 2000,
+        consumedCalories: 1150,
+        exerciseCalories: 350
+    )
+
+    static let sampleActivityOnlyRemaining = CalorieSummary(
         dailyGoal: 2000,
         consumedCalories: 2056,
         exerciseCalories: 300

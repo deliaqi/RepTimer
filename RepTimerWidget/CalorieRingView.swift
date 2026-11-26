@@ -134,10 +134,16 @@ struct CalorieRingGraphic: View {
             : Color(red: 0.13, green: 0.51, blue: 0.96)
     }
 
-    private var remainingOrange: Color {
+    private var activityOrange: Color {
         colorScheme == .dark
             ? Color(red: 0.78, green: 0.46, blue: 0.13)
             : Color(red: 0.96, green: 0.58, blue: 0.16)
+    }
+
+    private var goalAllowanceGray: Color {
+        colorScheme == .dark
+            ? Color(red: 0.20, green: 0.21, blue: 0.24)
+            : Color(red: 0.89, green: 0.90, blue: 0.92)
     }
 
     private var overStripeDark: Color {
@@ -189,12 +195,46 @@ struct CalorieRingGraphic: View {
     @ViewBuilder
     private func remainingRing(size: CGFloat, radius: CGFloat, minSafeFraction: Double) -> some View {
         let rawFraction = summary.consumedFraction
+        let circumference = max(1, 2 * CGFloat.pi * radius)
+        let minVisibleExerciseFraction = Double(max(1.5, lineWidth * 0.16) / circumference)
+        let hasExerciseAllowance = summary.exerciseCalories >= 0.5 && summary.exerciseBudgetFraction > 0
+        let activityFraction: CGFloat = hasExerciseAllowance
+            ? CGFloat(max(minVisibleExerciseFraction, min(1, summary.exerciseBudgetFraction)))
+            : 0
+        let goalBoundary: CGFloat = max(0, min(1, 1 - activityFraction))
+        let seamOverlap: CGFloat = renderingMode == .fullColor ? 0.002 : 0
 
         if rawFraction <= 0.001 {
-            // 0 calories consumed: unbroken remaining ring.
-            Circle()
-                .stroke(remainingFillColor, lineWidth: lineWidth)
-                .padding(lineWidth / 2)
+            // 0 calories consumed: neutral goal-allowance ring with an orange activity segment ending at 12 o'clock.
+            if activityFraction >= 0.9999 {
+                Circle()
+                    .stroke(activityRemainingFillColor, lineWidth: lineWidth)
+                    .padding(lineWidth / 2)
+            } else if activityFraction > 0.0001 {
+                ZStack {
+                    if goalBoundary > 0.0001 {
+                        RingSegmentShape(
+                            startFraction: 0,
+                            endFraction: min(1, goalBoundary + seamOverlap),
+                            lineWidth: lineWidth,
+                            roundEnd: false
+                        )
+                        .fill(goalRemainingFillColor, style: FillStyle(eoFill: true))
+                    }
+
+                    RingSegmentShape(
+                        startFraction: goalBoundary,
+                        endFraction: 1,
+                        lineWidth: lineWidth,
+                        roundEnd: false
+                    )
+                    .fill(activityRemainingFillColor, style: FillStyle(eoFill: true))
+                }
+            } else {
+                Circle()
+                    .stroke(goalRemainingFillColor, lineWidth: lineWidth)
+                    .padding(lineWidth / 2)
+            }
         } else if rawFraction >= 0.985 {
             // Budget reached cleanly: unbroken consumed ring.
             Circle()
@@ -204,16 +244,31 @@ struct CalorieRingGraphic: View {
         } else {
             let fraction = CGFloat(max(minSafeFraction, min(0.97, rawFraction)))
             let capPoint = pointOnMidline(fraction: fraction, size: size, radius: radius)
+            let activityStart = max(fraction, goalBoundary)
 
-            // Remaining arc with a transparent crescent cutout at the consumed tip.
+            // Remaining portion distinguishes base goal allowance (neutral gray) from
+            // calories added by activities (orange), with a transparent crescent cutout at the consumed tip.
             ZStack {
-                RingSegmentShape(
-                    startFraction: fraction,
-                    endFraction: 1,
-                    lineWidth: lineWidth,
-                    roundEnd: false
-                )
-                .fill(remainingFillColor, style: FillStyle(eoFill: true))
+                if activityStart > fraction + 0.0001 {
+                    let goalEnd = hasExerciseAllowance ? min(1, activityStart + seamOverlap) : 1
+                    RingSegmentShape(
+                        startFraction: fraction,
+                        endFraction: goalEnd,
+                        lineWidth: lineWidth,
+                        roundEnd: false
+                    )
+                    .fill(goalRemainingFillColor, style: FillStyle(eoFill: true))
+                }
+
+                if hasExerciseAllowance && activityStart < 0.9999 {
+                    RingSegmentShape(
+                        startFraction: activityStart,
+                        endFraction: 1,
+                        lineWidth: lineWidth,
+                        roundEnd: false
+                    )
+                    .fill(activityRemainingFillColor, style: FillStyle(eoFill: true))
+                }
 
                 Circle()
                     .frame(width: lineWidth + gapWidth * 2, height: lineWidth + gapWidth * 2)
@@ -317,8 +372,12 @@ struct CalorieRingGraphic: View {
         renderingMode == .fullColor ? consumedBlue : .primary
     }
 
-    private var remainingFillColor: Color {
-        renderingMode == .fullColor ? remainingOrange : .primary.opacity(0.32)
+    private var goalRemainingFillColor: Color {
+        renderingMode == .fullColor ? goalAllowanceGray : .primary.opacity(0.20)
+    }
+
+    private var activityRemainingFillColor: Color {
+        renderingMode == .fullColor ? activityOrange : .primary.opacity(0.50)
     }
 
     private var overBaseFillColor: Color {
@@ -356,49 +415,113 @@ struct CalorieWidgetView: View {
 
     private var systemSmallView: some View {
         GeometryReader { proxy in
-            let ringDiameter = min(proxy.size.width, proxy.size.height)
-            let ringStroke = max(8.5, ringDiameter * 0.08075)
-            let gap = max(2.0, ringStroke * 0.25)
+            let availableWidth = proxy.size.width
+            let availableHeight = proxy.size.height
+            let footerHeight: CGFloat = entry.isConfigured ? max(18, availableHeight * 0.145) : 0
+            let footerSpacing: CGFloat = entry.isConfigured ? max(4, availableHeight * 0.04) : 0
+            let ringDiameter = min(
+                availableWidth,
+                max(48, availableHeight - footerHeight - footerSpacing)
+            )
+            let ringStroke = max(7.0, ringDiameter * 0.085)
+            let gap = max(1.8, ringStroke * 0.25)
 
-            ZStack {
-                CalorieRingGraphic(
-                    summary: entry.summary,
-                    isConfigured: entry.isConfigured,
-                    lineWidth: ringStroke,
-                    gapWidth: gap
-                )
+            VStack(spacing: footerSpacing) {
+                ZStack {
+                    CalorieRingGraphic(
+                        summary: entry.summary,
+                        isConfigured: entry.isConfigured,
+                        lineWidth: ringStroke,
+                        gapWidth: gap
+                    )
 
-                VStack(spacing: 2) {
-                    if entry.isConfigured {
-                        Text(formattedNumber(entry.summary.displayValue))
-                            .font(.system(size: ringDiameter * 0.204, weight: .bold, design: .default))
-                            .monospacedDigit()
-                            .foregroundStyle(primaryTextColor)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.55)
+                    VStack(spacing: 1) {
+                        if entry.isConfigured {
+                            Text(formattedNumber(entry.summary.displayValue))
+                                .font(.system(size: ringDiameter * 0.215, weight: .bold, design: .default))
+                                .monospacedDigit()
+                                .foregroundStyle(primaryTextColor)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.55)
 
-                        Text(entry.summary.statusLabel)
-                            .font(.system(size: ringDiameter * 0.105, weight: .regular, design: .default))
-                            .foregroundStyle(secondaryTextColor)
-                            .lineLimit(1)
-                    } else {
-                        Image(systemName: "heart.text.square.fill")
-                            .font(.system(size: ringDiameter * 0.18, weight: .semibold))
-                            .foregroundStyle(Color(red: 0.13, green: 0.51, blue: 0.96))
-                            .widgetAccentable()
+                            Text(entry.summary.statusLabel)
+                                .font(.system(size: ringDiameter * 0.112, weight: .regular, design: .default))
+                                .foregroundStyle(secondaryTextColor)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
+                        } else {
+                            Image(systemName: "heart.text.square.fill")
+                                .font(.system(size: ringDiameter * 0.18, weight: .semibold))
+                                .foregroundStyle(Color(red: 0.13, green: 0.51, blue: 0.96))
+                                .widgetAccentable()
 
-                        Text("Set Up")
-                            .font(.system(size: ringDiameter * 0.115, weight: .semibold))
-                            .foregroundStyle(primaryTextColor)
+                            Text("Set Up")
+                                .font(.system(size: ringDiameter * 0.115, weight: .semibold))
+                                .foregroundStyle(primaryTextColor)
+                        }
                     }
+                    .padding(.horizontal, ringStroke + 8)
                 }
-                .padding(.horizontal, ringStroke + 10)
+                .frame(width: ringDiameter, height: ringDiameter)
+
+                if entry.isConfigured {
+                    smallWidgetBreakdownFooter(
+                        height: footerHeight,
+                        availableHeight: availableHeight
+                    )
+                }
             }
-            .frame(width: ringDiameter, height: ringDiameter)
-            .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
+            .frame(width: availableWidth, height: availableHeight, alignment: .center)
         }
+        .padding(.top, entry.isConfigured ? 11 : 14)
+        .padding(.bottom, entry.isConfigured ? 9 : 14)
+        .padding(.horizontal, 12)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityDescription)
+    }
+
+    private func smallWidgetBreakdownFooter(height: CGFloat, availableHeight: CGFloat) -> some View {
+        let iconSize = max(11, availableHeight * 0.10)
+        let numberSize = max(12, availableHeight * 0.105)
+
+        return HStack(spacing: 0) {
+            HStack(spacing: 4) {
+                Image(systemName: "fork.knife")
+                    .font(.system(size: iconSize, weight: .semibold))
+                    .foregroundStyle(footerConsumedColor)
+                    .widgetAccentable()
+
+                Text(formattedNumber(Int(entry.summary.consumedCalories.rounded())))
+                    .font(.system(size: numberSize, weight: .medium, design: .default))
+                    .monospacedDigit()
+                    .foregroundStyle(primaryTextColor)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .padding(.trailing, 10)
+
+            Rectangle()
+                .fill(footerDividerColor)
+                .frame(width: 1, height: max(14, height * 0.85))
+
+            HStack(spacing: 4) {
+                Image(systemName: "flame.fill")
+                    .font(.system(size: iconSize, weight: .semibold))
+                    .foregroundStyle(footerExerciseColor)
+                    .widgetAccentable()
+
+                Text(formattedNumber(Int(entry.summary.exerciseCalories.rounded())))
+                    .font(.system(size: numberSize, weight: .medium, design: .default))
+                    .monospacedDigit()
+                    .foregroundStyle(primaryTextColor)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.leading, 10)
+        }
+        .frame(height: height)
     }
 
     // MARK: - iPhone Lock Screen Circular
@@ -501,6 +624,25 @@ struct CalorieWidgetView: View {
     private var secondaryTextColor: Color {
         guard renderingMode == .fullColor else { return .secondary }
         return colorScheme == .dark ? .white.opacity(0.78) : Color(red: 0.16, green: 0.18, blue: 0.21)
+    }
+
+    private var footerConsumedColor: Color {
+        guard renderingMode == .fullColor else { return .primary }
+        return colorScheme == .dark
+            ? Color(red: 0.18, green: 0.54, blue: 0.92)
+            : Color(red: 0.13, green: 0.51, blue: 0.96)
+    }
+
+    private var footerExerciseColor: Color {
+        guard renderingMode == .fullColor else { return .primary }
+        return colorScheme == .dark
+            ? Color(red: 0.90, green: 0.54, blue: 0.16)
+            : Color(red: 0.96, green: 0.58, blue: 0.16)
+    }
+
+    private var footerDividerColor: Color {
+        guard renderingMode == .fullColor else { return .primary.opacity(0.28) }
+        return colorScheme == .dark ? Color.white.opacity(0.22) : Color.black.opacity(0.18)
     }
 
     private func formattedNumber(_ value: Int) -> String {
