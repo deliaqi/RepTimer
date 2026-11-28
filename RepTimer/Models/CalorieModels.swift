@@ -78,4 +78,8 @@ struct CalorieSnapshot: Codable, Equatable, Sendable {
     let exerciseCalories: Double
     let dayStart: Date
     let updatedAt: Date
+    // Macro grams shared with the medium widget. Optional so older snapshots still decode.
+    var proteinGrams: Double?
+    var carbsGrams: Double?
+    var fatGrams: Double?
 }

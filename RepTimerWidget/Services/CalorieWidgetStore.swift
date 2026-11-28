@@ -45,7 +45,8 @@ final class CalorieWidgetStore: Sendable {
         return CalorieSummary(
             dailyGoal: dailyGoal,
             consumedCalories: snapshot?.consumedCalories ?? 0,
-            exerciseCalories: snapshot?.exerciseCalories ?? 0
+            exerciseCalories: snapshot?.exerciseCalories ?? 0,
+            macros: snapshot?.macros ?? .zero
         )
     }
 }

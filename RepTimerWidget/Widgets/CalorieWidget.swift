@@ -108,8 +108,8 @@ struct DailyCaloriesWidget: Widget {
             DailyCaloriesWidgetContainerView(entry: entry)
         }
         .configurationDisplayName("Daily Calories")
-        .description("Track consumed and remaining calories for the day from Apple Health.")
-        .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryRectangular])
+        .description("Track consumed and remaining calories and macros for the day from Apple Health.")
+        .supportedFamilies([.systemSmall, .systemMedium, .accessoryCircular, .accessoryRectangular])
         .contentMarginsDisabled()
     }
 }
@@ -142,6 +142,25 @@ private struct DailyCaloriesWidgetContainerView: View {
 }
 
 #Preview("Small - Unconfigured", as: .systemSmall) {
+    DailyCaloriesWidget()
+} timeline: {
+    CalorieWidgetEntry(
+        date: .now,
+        summary: CalorieSummary(dailyGoal: 2000, consumedCalories: 0, exerciseCalories: 0),
+        isConfigured: false,
+        isPlaceholder: false
+    )
+}
+
+#Preview("Medium - Macros", as: .systemMedium) {
+    DailyCaloriesWidget()
+} timeline: {
+    CalorieWidgetEntry.sampleRemaining
+    CalorieWidgetEntry.sampleActivityOnlyRemaining
+    CalorieWidgetEntry.sampleOver
+}
+
+#Preview("Medium - Unconfigured", as: .systemMedium) {
     DailyCaloriesWidget()
 } timeline: {
     CalorieWidgetEntry(

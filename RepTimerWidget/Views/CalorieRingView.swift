@@ -406,6 +406,8 @@ struct CalorieWidgetView: View {
             accessoryCircularView
         case .accessoryRectangular:
             accessoryRectangularView
+        case .systemMedium:
+            systemMediumView
         default:
             systemSmallView
         }
@@ -414,6 +416,16 @@ struct CalorieWidgetView: View {
     // MARK: - Small Home Screen / StandBy / iPad Lock Screen
 
     private var systemSmallView: some View {
+        ringColumn
+            .padding(.top, entry.isConfigured ? 11 : 14)
+            .padding(.bottom, entry.isConfigured ? 9 : 14)
+            .padding(.horizontal, 12)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(accessibilityDescription)
+    }
+
+    /// Calorie ring with the consumed / active breakdown footer, shared by the small and medium layouts.
+    private var ringColumn: some View {
         GeometryReader { proxy in
             let availableWidth = proxy.size.width
             let availableHeight = proxy.size.height
@@ -473,11 +485,98 @@ struct CalorieWidgetView: View {
             }
             .frame(width: availableWidth, height: availableHeight, alignment: .center)
         }
+    }
+
+    // MARK: - Medium Home Screen
+
+    private var systemMediumView: some View {
+        GeometryReader { proxy in
+            HStack(spacing: 16) {
+                ringColumn
+                    .frame(width: min(proxy.size.height, proxy.size.width * 0.45))
+
+                if entry.isConfigured {
+                    macroColumn
+                } else {
+                    mediumSetupPrompt
+                }
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+        }
         .padding(.top, entry.isConfigured ? 11 : 14)
         .padding(.bottom, entry.isConfigured ? 9 : 14)
-        .padding(.horizontal, 12)
+        .padding(.leading, 12)
+        .padding(.trailing, 16)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityDescription)
+        .accessibilityLabel(mediumAccessibilityDescription)
+    }
+
+    /// Protein / carbs / fat rows comparing today's intake to the recommended grams for the calorie goal.
+    private var macroColumn: some View {
+        VStack(alignment: .leading, spacing: 11) {
+            ForEach(entry.summary.macroProgress) { progress in
+                macroRow(progress)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+    }
+
+    private func macroRow(_ progress: MacroProgress) -> some View {
+        let isOver = progress.fraction > 1.005
+
+        return VStack(alignment: .leading, spacing: 5) {
+            HStack(alignment: .firstTextBaseline, spacing: 0) {
+                Text(progress.kind.title)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(primaryTextColor)
+                    .lineLimit(1)
+
+                Spacer(minLength: 6)
+
+                Text(formattedNumber(Int(progress.consumedGrams.rounded())))
+                    .font(.system(size: 13, weight: .bold))
+                    .monospacedDigit()
+                    .foregroundStyle(primaryTextColor)
+                    .lineLimit(1)
+
+                Text(" / \(formattedNumber(Int(progress.recommendedGrams.rounded())))g")
+                    .font(.system(size: 11, weight: .medium))
+                    .monospacedDigit()
+                    .foregroundStyle(secondaryTextColor)
+                    .lineLimit(1)
+            }
+            .minimumScaleFactor(0.8)
+
+            HStack(spacing: 8) {
+                MacroProgressBar(
+                    fraction: progress.fraction,
+                    fillColor: macroFillColor(for: progress.kind),
+                    trackColor: macroTrackColor
+                )
+                .frame(height: 6)
+
+                Text("\(progress.percentage)%")
+                    .font(.system(size: 11, weight: isOver ? .bold : .semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(isOver ? macroFillColor(for: progress.kind) : secondaryTextColor)
+                    .lineLimit(1)
+                    .frame(minWidth: 34, alignment: .trailing)
+            }
+        }
+    }
+
+    private var mediumSetupPrompt: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Calories & Macros")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(primaryTextColor)
+
+            Text("Connect Apple Health in Tempo Settings to track protein, carbs, and fat.")
+                .font(.system(size: 12))
+                .foregroundStyle(secondaryTextColor)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func smallWidgetBreakdownFooter(height: CGFloat, availableHeight: CGFloat) -> some View {
@@ -645,6 +744,26 @@ struct CalorieWidgetView: View {
         return colorScheme == .dark ? Color.white.opacity(0.22) : Color.black.opacity(0.18)
     }
 
+    private func macroFillColor(for kind: MacroKind) -> Color {
+        guard renderingMode == .fullColor else { return .primary }
+        let isDark = colorScheme == .dark
+        switch kind {
+        case .protein:
+            return isDark ? Color(red: 0.86, green: 0.29, blue: 0.40) : Color(red: 0.93, green: 0.31, blue: 0.43)
+        case .carbs:
+            return isDark ? Color(red: 0.22, green: 0.66, blue: 0.43) : Color(red: 0.20, green: 0.72, blue: 0.46)
+        case .fat:
+            return isDark ? Color(red: 0.57, green: 0.39, blue: 0.87) : Color(red: 0.62, green: 0.41, blue: 0.95)
+        }
+    }
+
+    private var macroTrackColor: Color {
+        guard renderingMode == .fullColor else { return .primary.opacity(0.20) }
+        return colorScheme == .dark
+            ? Color(red: 0.20, green: 0.21, blue: 0.24)
+            : Color(red: 0.89, green: 0.90, blue: 0.92)
+    }
+
     private func formattedNumber(_ value: Int) -> String {
         value.formatted(.number.grouping(.automatic))
     }
@@ -662,5 +781,38 @@ struct CalorieWidgetView: View {
             return "Daily Calories widget. Open Tempo Settings to connect Apple Health."
         }
         return "\(entry.summary.displayValue) calories \(entry.summary.statusLabel.lowercased()). \(Int(entry.summary.consumedCalories.rounded())) consumed, \(Int(entry.summary.exerciseCalories.rounded())) active burned, daily goal \(Int(entry.summary.dailyGoal.rounded()))."
+    }
+
+    private var mediumAccessibilityDescription: String {
+        guard entry.isConfigured else { return accessibilityDescription }
+        let macros = entry.summary.macroProgress.map { progress in
+            "\(progress.kind.title) \(Int(progress.consumedGrams.rounded())) of \(Int(progress.recommendedGrams.rounded())) grams, \(progress.percentage) percent"
+        }
+        return "\(accessibilityDescription) \(macros.joined(separator: ". "))."
+    }
+}
+
+/// Horizontal capsule bar showing progress toward a recommended intake; fills completely at or above 100%.
+private struct MacroProgressBar: View {
+    let fraction: Double
+    let fillColor: Color
+    let trackColor: Color
+
+    var body: some View {
+        GeometryReader { proxy in
+            let clamped = min(1, max(0, fraction))
+            // Keep any non-zero progress at least as wide as the bar is tall so the rounded cap stays visible.
+            let fillWidth = clamped > 0 ? max(proxy.size.height, proxy.size.width * clamped) : 0
+
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(trackColor)
+
+                Capsule()
+                    .fill(fillColor)
+                    .frame(width: fillWidth)
+                    .widgetAccentable()
+            }
+        }
     }
 }

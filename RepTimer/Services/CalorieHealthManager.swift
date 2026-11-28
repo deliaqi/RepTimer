@@ -25,7 +25,10 @@ final class CalorieHealthManager {
     private var readTypes: Set<HKObjectType> {
         [
             HKQuantityType(.dietaryEnergyConsumed),
-            HKQuantityType(.activeEnergyBurned)
+            HKQuantityType(.activeEnergyBurned),
+            HKQuantityType(.dietaryProtein),
+            HKQuantityType(.dietaryCarbohydrates),
+            HKQuantityType(.dietaryFatTotal)
         ]
     }
 
@@ -85,7 +88,16 @@ final class CalorieHealthManager {
         }
 
         registerBackgroundObserversIfNeeded()
+        await requestNewlyAddedReadTypesIfNeeded()
         await refreshTodayCalories()
+    }
+
+    /// Prompts users who connected Apple Health before macro tracking existed to grant the new
+    /// protein / carbs / fat read types. HealthKit only reports `.shouldRequest` for undetermined types.
+    private func requestNewlyAddedReadTypesIfNeeded() async {
+        guard let status = try? await healthStore.statusForAuthorizationRequest(toShare: [], read: readTypes),
+              status == .shouldRequest else { return }
+        try? await healthStore.requestAuthorization(toShare: [], read: readTypes)
     }
 
     func refreshTodayCalories() async {
@@ -99,15 +111,22 @@ final class CalorieHealthManager {
         let startOfDay = Calendar.current.startOfDay(for: now)
 
         do {
-            async let consumed = fetchCumulativeKilocalories(for: .dietaryEnergyConsumed, start: startOfDay, end: now)
-            async let exercise = fetchCumulativeKilocalories(for: .activeEnergyBurned, start: startOfDay, end: now)
+            async let consumed = fetchCumulativeSum(for: .dietaryEnergyConsumed, unit: .kilocalorie(), start: startOfDay, end: now)
+            async let exercise = fetchCumulativeSum(for: .activeEnergyBurned, unit: .kilocalorie(), start: startOfDay, end: now)
+            async let protein = fetchCumulativeSum(for: .dietaryProtein, unit: .gram(), start: startOfDay, end: now)
+            async let carbs = fetchCumulativeSum(for: .dietaryCarbohydrates, unit: .gram(), start: startOfDay, end: now)
+            async let fat = fetchCumulativeSum(for: .dietaryFatTotal, unit: .gram(), start: startOfDay, end: now)
 
             let (consumedValue, exerciseValue) = try await (consumed, exercise)
+            let (proteinValue, carbsValue, fatValue) = try await (protein, carbs, fat)
             let snapshot = CalorieSnapshot(
                 consumedCalories: consumedValue,
                 exerciseCalories: exerciseValue,
                 dayStart: startOfDay,
-                updatedAt: now
+                updatedAt: now,
+                proteinGrams: proteinValue,
+                carbsGrams: carbsValue,
+                fatGrams: fatValue
             )
 
             store.saveSnapshot(snapshot)
@@ -164,8 +183,9 @@ final class CalorieHealthManager {
         }
     }
 
-    private func fetchCumulativeKilocalories(
+    private func fetchCumulativeSum(
         for identifier: HKQuantityTypeIdentifier,
+        unit: HKUnit,
         start: Date,
         end: Date
     ) async throws -> Double {
@@ -179,6 +199,6 @@ final class CalorieHealthManager {
             options: .cumulativeSum
         )
         let statistics = try await descriptor.result(for: healthStore)
-        return statistics?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
+        return statistics?.sumQuantity()?.doubleValue(for: unit) ?? 0
     }
 }

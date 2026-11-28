@@ -21,15 +21,22 @@ final class CalorieWidgetHealthReader: Sendable {
         let startOfDay = calendar.startOfDay(for: now)
 
         do {
-            async let consumed = fetchCumulativeKilocalories(for: .dietaryEnergyConsumed, start: startOfDay, end: now)
-            async let exercise = fetchCumulativeKilocalories(for: .activeEnergyBurned, start: startOfDay, end: now)
+            async let consumed = fetchCumulativeSum(for: .dietaryEnergyConsumed, unit: .kilocalorie(), start: startOfDay, end: now)
+            async let exercise = fetchCumulativeSum(for: .activeEnergyBurned, unit: .kilocalorie(), start: startOfDay, end: now)
+            async let protein = fetchCumulativeSum(for: .dietaryProtein, unit: .gram(), start: startOfDay, end: now)
+            async let carbs = fetchCumulativeSum(for: .dietaryCarbohydrates, unit: .gram(), start: startOfDay, end: now)
+            async let fat = fetchCumulativeSum(for: .dietaryFatTotal, unit: .gram(), start: startOfDay, end: now)
 
             let (consumedValue, exerciseValue) = try await (consumed, exercise)
+            let macros = try await MacroNutrients(proteinGrams: protein, carbsGrams: carbs, fatGrams: fat)
             let snapshot = CalorieSnapshot(
                 consumedCalories: consumedValue,
                 exerciseCalories: exerciseValue,
                 dayStart: startOfDay,
-                updatedAt: now
+                updatedAt: now,
+                proteinGrams: macros.proteinGrams,
+                carbsGrams: macros.carbsGrams,
+                fatGrams: macros.fatGrams
             )
             store.saveSnapshot(snapshot)
 
@@ -37,7 +44,8 @@ final class CalorieWidgetHealthReader: Sendable {
                 summary: CalorieSummary(
                     dailyGoal: goal,
                     consumedCalories: consumedValue,
-                    exerciseCalories: exerciseValue
+                    exerciseCalories: exerciseValue,
+                    macros: macros
                 ),
                 isConfigured: true
             )
@@ -51,8 +59,9 @@ final class CalorieWidgetHealthReader: Sendable {
         }
     }
 
-    private func fetchCumulativeKilocalories(
+    private func fetchCumulativeSum(
         for identifier: HKQuantityTypeIdentifier,
+        unit: HKUnit,
         start: Date,
         end: Date
     ) async throws -> Double {
@@ -66,6 +75,6 @@ final class CalorieWidgetHealthReader: Sendable {
             options: .cumulativeSum
         )
         let statistics = try await descriptor.result(for: healthStore)
-        return statistics?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
+        return statistics?.sumQuantity()?.doubleValue(for: unit) ?? 0
     }
 }
